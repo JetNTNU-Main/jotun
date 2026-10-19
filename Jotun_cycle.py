@@ -55,8 +55,7 @@ P02 = P01*πc
 P03 = P02 * (1 - ΔP_combustor)
 ws_C = ((gamma*R*T01)/(gamma-1))*((πc)**((gamma-1)/gamma)-1)
 
-eta_c = .7
-
+eta_c = .83
 wC = ws_C/eta_c # required compressor work
 
 d_2 = .195 #m
@@ -86,8 +85,7 @@ mdot_exhaust = mdot_air + mdot_fuel
 rho_03 = P03/(R*T03)
 v3 = 40
 v3 = 200
-v3 = 120
-print(Q_inn)
+
 # mdot_air = rho_02*v1*A1
 
 #P3 = P03 - (0.5*rho_03*v3**2)/1e3
@@ -100,40 +98,30 @@ A3 =  mdot_exhaust/(rho_3*v3)
 WTdot = WCdot / eta_m
 M = lambda v,T: v / np.sqrt(gamma * R * 1000 * T)
 q = lambda rho,v: 0.5*rho*v**2/1e3
-eta_t = .75
-
+eta_t = .87
 T04 = T03 - WTdot/(mdot_exhaust*cp_1000)
 T04s = T03 - (T03 - T04)/eta_t
 P04 = P03 * (T04s/T03)**(gamma_1000/(gamma_1000 - 1))
 rho_04 = P04/(R*T04)
 ΔP_AB = 0.07
 v4 = 80
-v4 = 220
-
-T4 = T04 - (v4**2)/(2*cp_1000*1e3) 
+#P4 = P04 - (0.5*rho_04*v4**2)/1e3
+T4 = T04 - (v4**2)/(2*cp_1000*1e3)
 P4 = P04*(T4/T04)**(gamma_1000/(gamma_1000-1))
 rho_4 = P4/(R*T4)
 P05 = P04 * (1 - ΔP_AB)
 A4 =  mdot_exhaust/(rho_4*v4)
-
+# P05 = P_AMBIENT*1.9
 
 T05 = T05s = 1300 #K Afterburner target stagTemp
 eta_n = 0.90 # Nozzle efficency
 rho_05 = P05/(R*T05)
-
-
-eta_AB = 0.80  # afterburner combustion efficiency
-Q_AB = cp_1000 * (T05 - T04)  # kJ/kg exhaust gas entering AB
-mdot_fuel_AB = (mdot_exhaust * Q_AB) / (LHV * eta_AB)
-mdot_exit = mdot_exhaust + mdot_fuel_AB
-v5 = 200
+v5 = 130
+#P5 = P05 - (0.5*rho_05*v5**2)/1e3
 T5 = T05 - (v5**2)/(2*cp_1000*1e3)
 P5 = P05*(T5/T05)**(gamma_1000/(gamma_1000-1))
-
 rho_5 = P5/(R*T5)
-
-A5 = mdot_exit/(rho_5*v5)
-#v5 = 
+A5 =  mdot_exhaust/(rho_5*v5)
 
 
 P6 = P01
@@ -142,16 +130,16 @@ T6 = T05 - eta_n * (T05 - T6s)
 v6 = np.sqrt(2 * cp_1000 * 1000 * (T05 - T6))
 rho_6 = P6 / (R * T6)
 #T06 = T05 - eta_n*(T05 - T06s)
-
 T06 = T05
 P06 = P6 * (T06 / T6)**(gamma_1000/(gamma_1000-1))
 rho_06 = P06/(R*T06)
 T06s = T05 * (P06/P05)**((gamma_1000-1)/gamma_1000)
 
+eta_AB = 0.80  # afterburner combustion efficiency
 
-
-
-
+Q_AB = cp_1000 * (T05 - T04)  # kJ/kg exhaust gas entering AB
+mdot_fuel_AB = (mdot_exhaust * Q_AB) / (LHV * eta_AB)
+mdot_exit = mdot_exhaust + mdot_fuel_AB
 
 
 A6 = mdot_exit/(rho_6*v6)
@@ -212,7 +200,11 @@ h4 = cp_1000*T4
 h5 = cp_1000*T5
 h6 = cp_1000*T6
 enthalpy = [h01, h02, h03, h04, h05, h06]
+# plt.plot(entropy, enthalpy, color="b", label='Enthalpy')
 
+# plt.text(.1,300, f"Δh02_01 = {Δh02_01:.2f} kJ/kg",   fontsize=6)
+# plt.text(.2,600, f"Δh03_02 = {Δh03_02:.2f} kJ/kg",   fontsize=8, rotation=35)
+# plt.text(.2,600, f"Δh03_01 = {Δh03_01:.2f} kJ/kg",   fontsize=8, rotation=35)
 plt.text(.05,286, "1: Inlet",   fontsize=8)
 plt.text(.12,425, "2: Compressor exit / plenum ",   fontsize=8)
 plt.text(.9,1030, "3: Combustion exit",   fontsize=8)
@@ -335,7 +327,7 @@ df = pd.DataFrame(engine_cycle_table)
 # call_engine_cycle();
 print();print(df.to_string(index=False));print()
 # print(f'TSFC = {TSFC}')
-test_time = 60 #s
+test_time = 60*60 #s
 T = (WTdot*1e3)/ω
 τmax = 400*1e6 #Pa
 hub_D = ((16*T)/(π*τmax))**(1/3)
@@ -343,21 +335,10 @@ hub_D = 0.0800#m (80mm)
 
 # print(f'P02 = {P2*(1+(.5*(gamma-1)*M(v2,T2)**2))**(gamma/(gamma-1)):.2f} kPa')
 τmax = ((16*T)/(π*hub_D**3))/10e5 #Pa
-# print(f'Fuel consumed: {(mdot_fuel+mdot_fuel_AB)*test_time:.2f} kg')
+print(f'Fuel consumed: {(mdot_fuel+mdot_fuel_AB)*test_time:.2f} kg')
 print(f'P_Turbin = {WTdot:.2f} kW')
 print(f'P_Kompressor = {WCdot:.2f} kW')
-# print(f'mdot = {mdot_air:.2f} kg/s')
+print(f'mdot = {mdot_air:.2f} kg/s')
 # print(f'T = {T} Nm')
 # print(f'shaft = {hub_D*1e3} mm')
 # print(f'τmax = {τmax:.2f} MPa @ hub_D = {hub_D*1e3:.2f} mm')
-print(f'Fuel consumed during static test: {(mdot_fuel+mdot_fuel_AB)*test_time:.2f} kg')
-# print(f'P_Turbin = {WTdot:.2f} kW')
-# print(f'P_Kompressor = {WCdot/mdot_air:.2f} kW')
-# print(f'mdot = {mdot_air:.2f} kg/s')
-# print(f'v6 = {v6:.2f} m/s')
-# print(f'v6*mdot = {mdot_exit:.2f} N')
-# print(f'T = {T} Nm')
-# print(f'shaft = {hub_D*1e3} mm')
-# print(f'τmax = {τmax:.2f} MPa @ hub_D = {hub_D*1e3:.2f} mm')
-
-#print(d())
