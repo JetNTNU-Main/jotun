@@ -55,7 +55,7 @@ P02 = P01*πc
 P03 = P02 * (1 - ΔP_combustor)
 ws_C = ((gamma*R*T01)/(gamma-1))*((πc)**((gamma-1)/gamma)-1)
 
-eta_c = .83
+eta_c = .85
 wC = ws_C/eta_c # required compressor work
 
 d_2 = .195 #m
@@ -83,8 +83,7 @@ WCdot = mdot_air*wC
 mdot_fuel = (mdot_air*Q_inn)/(LHV*eta_b)
 mdot_exhaust = mdot_air + mdot_fuel
 rho_03 = P03/(R*T03)
-v3 = 40
-v3 = 200
+v3 = 139
 
 # mdot_air = rho_02*v1*A1
 
@@ -104,7 +103,7 @@ T04s = T03 - (T03 - T04)/eta_t
 P04 = P03 * (T04s/T03)**(gamma_1000/(gamma_1000 - 1))
 rho_04 = P04/(R*T04)
 ΔP_AB = 0.07
-v4 = 80
+v4 = 197
 #P4 = P04 - (0.5*rho_04*v4**2)/1e3
 T4 = T04 - (v4**2)/(2*cp_1000*1e3)
 P4 = P04*(T4/T04)**(gamma_1000/(gamma_1000-1))
