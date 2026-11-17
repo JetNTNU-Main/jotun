@@ -42,7 +42,7 @@ stagTemp[0] = config.getfloat("temps", "ambient")  # K
 velocities[0] = config.getfloat("flow", "v_1")  # m/s
 d_1 = config.getfloat("engine", "inlet_diameter")  # m
 pic = config.getfloat("compressor", "pressure_ratio")
-ΔP_combustor = config.getfloat("combustor", "delta_p")
+delta_P_combustor = config.getfloat("combustor", "delta_p")
 eta_c = config.getfloat("efficiencies", "compressor")  # Compressor efficiency
 d_2 = config.getfloat("compressor", "diameter")  # m
 stagTemp[2] = T03s = config.getfloat("temps", "combustor")
@@ -50,7 +50,7 @@ eta_b = config.getfloat("efficiencies", "combustor")  # Combustion efficiency
 eta_m = config.getfloat("efficiencies", "mechanical")  # Mechanical efficieny between turbine and compressor
 velocities[2] = config.getfloat("flow", "v_3")
 eta_t = config.getfloat("efficiencies", "turbine")
-ΔP_AB = config.getfloat("afterburner", "delta_p")
+delta_P_AB = config.getfloat("afterburner", "delta_p")
 velocities[3] = config.getfloat("flow", "v_4")
 stagTemp[4] = T05s = config.getfloat("temps", "afterburner")  # K Afterburner target stagTemp
 eta_n = config.getfloat("efficiencies", "nozzle")  # Nozzle efficency
@@ -96,7 +96,7 @@ ws_C = ((gamma_300 * R * stagTemp[0]) / (gamma_300 - 1)) * ((pic)**((gamma_300 -
 wC = ws_C / eta_c  # required compressor work
 WCdot = massFlow[0] * wC
 
-stagPres[2] = stagPres[1] * (1 - ΔP_combustor)
+stagPres[2] = stagPres[1] * (1 - delta_P_combustor)
 stagDensity[2] = stagPres[2] / (R * stagTemp[2])
 Q_inn = c_avg(cp_300, cp_1000) * (stagTemp[2] - stagTemp[1])
 mdot_fuel = (massFlow[1] * Q_inn) / (LHV * eta_b)
@@ -117,7 +117,7 @@ Pres[3] = stagPres[3] * (Temp[3] / stagTemp[3])**(gamma_1000 / (gamma_1000 - 1))
 Density[3] = Pres[3] / (R * Temp[3])
 areas[3] = massFlow[3] / (Density[3] * velocities[3])
 
-stagPres[4] = stagPres[3] * (1 - ΔP_AB)
+stagPres[4] = stagPres[3] * (1 - delta_P_AB)
 stagDensity[4] = stagPres[4] / (R * stagTemp[4])
 Temp[4] = stagTemp[4] - (velocities[4]**2) / (2 * cp_1000)
 Pres[4] = stagPres[4] * (Temp[4] / stagTemp[4])**(gamma_1000 / (gamma_1000 - 1))
@@ -141,28 +141,28 @@ Temp[5] = stagTemp[5] - (velocities[5]**2) / (2 * cp_1000)
 massFlow[5] = massFlow[4]
 areas[5] = massFlow[5] / (Density[5] * velocities[5])
 
-Δs2_1 = entropy[1] = cp_300 * np.log(stagTemp[1] / stagTemp[0]) - R * np.log(stagPres[1] / Pres[0])
-Δs3_2 = c_avg(cp_300, cp_1000) * np.log(stagTemp[2] / stagTemp[1]) - R * np.log(stagPres[2] / stagPres[1])
-entropy[2] = Δs3_2 + Δs2_1
-Δs4_3 = cp_1000 * np.log(stagTemp[3] / stagTemp[2]) - R * np.log(stagPres[3] / stagPres[2])
-entropy[3] = Δs4_3 + entropy[2]
-Δs5_4 = cp_1000 * np.log(stagTemp[4] / stagTemp[3]) - R * np.log(stagPres[4] / stagPres[3])
-entropy[4] = entropy[3] + Δs5_4
+delta_s2_1 = entropy[1] = cp_300 * np.log(stagTemp[1] / stagTemp[0]) - R * np.log(stagPres[1] / Pres[0])
+delta_s3_2 = c_avg(cp_300, cp_1000) * np.log(stagTemp[2] / stagTemp[1]) - R * np.log(stagPres[2] / stagPres[1])
+entropy[2] = delta_s3_2 + delta_s2_1
+delta_s4_3 = cp_1000 * np.log(stagTemp[3] / stagTemp[2]) - R * np.log(stagPres[3] / stagPres[2])
+entropy[3] = delta_s4_3 + entropy[2]
+delta_s5_4 = cp_1000 * np.log(stagTemp[4] / stagTemp[3]) - R * np.log(stagPres[4] / stagPres[3])
+entropy[4] = entropy[3] + delta_s5_4
 entropy[5] = cp_1000 * np.log(stagTemp[5] / stagTemp[4]) - R * np.log(stagPres[5] / stagPres[4]) + entropy[4]
 
 entropyS[1] = cp_300 * np.log(T02s / stagTemp[0]) - R * np.log(stagPres[1] / Pres[0])
-entropyS[2] = Δs3_2 + entropyS[1]
+entropyS[2] = delta_s3_2 + entropyS[1]
 
-Δh02_01 = cp_300 * (stagTemp[1] - stagTemp[0])
-Δh03_01 = c_avg(cp_300, cp_1000) * (stagTemp[2] - stagTemp[1]) + Δh02_01
-Δh04_01 = cp_1000 * (stagTemp[3] - stagTemp[2]) + Δh03_01
-Δh05_01 = cp_1000 * (stagTemp[4] - stagTemp[3]) + Δh04_01
-Δh06_01 = cp_1000 * (stagTemp[5] - stagTemp[4]) + Δh05_01
-Hdot02 = Δh02_01 * massFlow[1]
-Hdot03 = Δh03_01 * massFlow[2]
-Hdot04 = Δh04_01 * massFlow[3]
-Hdot05 = Δh05_01 * massFlow[4]
-Hdot06 = Δh06_01 * massFlow[5]
+delta_h02_01 = cp_300 * (stagTemp[1] - stagTemp[0])
+delta_h03_01 = c_avg(cp_300, cp_1000) * (stagTemp[2] - stagTemp[1]) + delta_h02_01
+delta_h04_01 = cp_1000 * (stagTemp[3] - stagTemp[2]) + delta_h03_01
+delta_h05_01 = cp_1000 * (stagTemp[4] - stagTemp[3]) + delta_h04_01
+delta_h06_01 = cp_1000 * (stagTemp[5] - stagTemp[4]) + delta_h05_01
+Hdot02 = delta_h02_01 * massFlow[1]
+Hdot03 = delta_h03_01 * massFlow[2]
+Hdot04 = delta_h04_01 * massFlow[3]
+Hdot05 = delta_h05_01 * massFlow[4]
+Hdot06 = delta_h06_01 * massFlow[5]
 
 specific_stagEnthalpy[0] = cp_300 * stagTemp[0]
 specific_stagEnthalpy[1] = cp_300 * stagTemp[1]
