@@ -191,7 +191,7 @@ mdot_hydrocarbons = mdot_fuel + mdot_fuel_AB
 TSFC = mdot_hydrocarbons / F_calc
 
 # print(f'TSFC = {TSFC}')
-test_time = 60 * 60  # s
+test_time = 60   # s
 T = (WTdot * 1e3) / ω
 tau_max = 400 * 1e6  # Pa
 hub_D = ((16 * T) / (pi * tau_max))**(1 / 3)
