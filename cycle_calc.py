@@ -56,6 +56,7 @@ stagTemp[4] = T05s = config.getfloat("temps", "afterburner")  # K Afterburner ta
 eta_n = config.getfloat("efficiencies", "nozzle")  # Nozzle efficency
 velocities[4] = config.getfloat("flow", "v_5")
 eta_AB = config.getfloat("efficiencies", "afterburner")  # afterburner combustion efficiency
+test_time = config.getfloat("engine", "runtime")
 
 ω = 2 * pi * N / 60
 
@@ -191,7 +192,6 @@ mdot_hydrocarbons = mdot_fuel + mdot_fuel_AB
 TSFC = mdot_hydrocarbons / F_calc
 
 # print(f'TSFC = {TSFC}')
-test_time = 60 * 60  # s
 T = (WTdot * 1e3) / ω
 tau_max = 400 * 1e6  # Pa
 hub_D = ((16 * T) / (pi * tau_max))**(1 / 3)
