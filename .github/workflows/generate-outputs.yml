@@ -10,14 +10,14 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       - name: Setup Python
         uses: actions/setup-python@v7.1.0
         with:
           python-version: "3.11"
           cache: "pip"
       - run: pip install -r requirements.txt
-      - run: python Jotun_cycle.py -t cycle.txt -j cycle.json
+      - run: python Jotun_cycle.py -t output/cycle.txt -j output/cycle.json
       - uses: actions/upload-artifact@v7.0.2
         with:
           name: generated-outputs
