@@ -1,26 +1,26 @@
 ﻿import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import sys
+import json
 
 from cycle_calc import (
-    Hdot03,
     Pres,
-    gamma_300,
     stagPres,
     Temp,
     stagTemp,
-    massFlow,
+    massFlow, # mDot
     Density,
-    specific_stagEnthalpy,
+    entropy,
     specific_Enthalpy,
+    specific_stagEnthalpy,
     velocities,
     areas,
-    dynamicPres,
     MACH,
+    dynamicPres,
     F_calc,
     F_calc_static,
     F_calc_static_ideal,
-    ve_calc,
     eta_c,
     eta_m,
     WCdot,
@@ -29,14 +29,14 @@ from cycle_calc import (
     Hdot03,
     Hdot04,
     Hdot05,
-    Hdot06,    
+    Hdot06,
     mdot_fuel,
     mdot_fuel_AB,
-    Δh02_01,
-    entropy,
+    delta_h02_01,
     test_time
 )
 
+STATION_LABELS = ["1: Inlet", "2: Compressor exit", "3: Combustor exit", "4: Turbine exit", "5: Afterburner exit", "6: Nozzle exit"]
 
 def tableRound(matrix, specifier=2):
     new_matrix = []
@@ -46,7 +46,7 @@ def tableRound(matrix, specifier=2):
 
 def build_cycle_table():
     engine_cycle_table = {
-        "Station": ["1: Inlet", "2: Compressor exit", "3: Combustor exit", "4: Turbine exit", "5: Afterburner exit", "6: Nozzle exit"],
+        "Station": STATION_LABELS,
         "P0 [kPa]": tableRound(np.divide(stagPres, 1000)),
         "T0 [K]": tableRound(stagTemp),
         "P [kPa]": tableRound(np.divide(Pres, 1000)),
@@ -66,8 +66,7 @@ def build_cycle_table():
     return pd.DataFrame(engine_cycle_table)
 
 
-def printboard():
-    F_calc_local = massFlow[5] * ve_calc
+def printboard(): # Er dette fremdeles oppdatert?
     print(f'eta_c = {eta_c:.2f}')
     print(f'WCdot = {WCdot:.2f} kW [kJ/s]')
     print(f'eta_m = {eta_m:.2f}')
@@ -94,9 +93,9 @@ def printboard():
     print(f'H3-WTdot = {Hdot03/1000 - WTdot/1000:.3f} kW')
     print(f'fuel-air ratio main = {mdot_fuel / massFlow[0]:.4f}')
     print(f'fuel-air ratio total = {(mdot_fuel + mdot_fuel_AB) / massFlow[0]:.4f}')
-    print(f'dh0 = {Δh02_01/1000:.2f} kJ/kg')
+    print(f'dh0 = {delta_h02_01/1000:.2f} kJ/kg')
     psi = .6
-    U2 = __import__('numpy').sqrt(Δh02_01 * 1e3 / psi)
+    U2 = np.sqrt(delta_h02_01 * 1e3 / psi)
     print(f'U2 = {U2:.2f}')
 
 
@@ -120,17 +119,66 @@ def plot_cycle():
     plt.legend()
     plt.grid()
 
+def change_stdout(file):
+    sys.stdout = open(file, 'w')
 
-def call_engine_cycle():
+def print_txt_table(file=None):
+    if file:
+        sys.stdout = open(file, 'w')
+
     # printboard()
     print(); print(build_cycle_table().to_string(index=False)); print()
     print(f'Fuel consumed: {(mdot_fuel + mdot_fuel_AB) * test_time:.2f} kg')
     print(f'P_Turbin = {WTdot/1000:.2f} kW')
     print(f'P_Kompressor = {WCdot/1000:.2f} kW')
     print(f'mdot = {massFlow[0]:.2f} kg/s')
+
+    if file:
+        sys.stdout.flush()
+        sys.stdout.close()
+
     # plot_cycle()
     # plt.show()
 
+def print_json(file=None):
+    if file:
+        sys.stdout = open(file, 'w')
+
+    data = {
+        "Stations": STATION_LABELS,
+        "Station Count": len(STATION_LABELS),
+        "Pres": Pres.tolist(),
+        "StagPres": stagPres.tolist(),
+        "Temp": Temp.tolist(),
+        "StagTemp": stagTemp.tolist(),
+        "MassFlow": massFlow.tolist(),
+        "Density": Density.tolist(),
+        "Entropy": entropy.tolist(),
+        "Specific_Enthalpy": specific_Enthalpy.tolist(),
+        "Specific_stagEnthalpy": specific_stagEnthalpy.tolist(),
+        "Velocities": velocities.tolist(),
+        "Areas": areas.tolist(),
+        "Mach": MACH,
+        "DynamicPres": dynamicPres,
+        "Thrust": F_calc,
+        "Thrust_static": F_calc_static,
+        "Thrust_static_ideal": F_calc_static_ideal,
+        "Compressor_Eff": eta_c,
+        "Mechanical_Eff": eta_m,
+        "Compressor_Work": WCdot,
+        "Turbine_Work": WTdot,
+        "Hdot": [None, Hdot02, Hdot03, Hdot04, Hdot05, Hdot06],
+        "Mass_Flow_Fuel": mdot_fuel,
+        "Mass_Flow_AB": mdot_fuel_AB,
+        "delta_h02_01": delta_h02_01, # Vet ikke hva dette er
+        "Test_Time": test_time
+    }
+    print(json.dumps(data))
+
+    if file:
+        sys.stdout.flush()
+        sys.stdout.close()
+
 
 if __name__ == "__main__":
-    call_engine_cycle()
+    print_txt_table()
