@@ -1,6 +1,10 @@
 name: Generate outputs
 
-on: [push]
+on:
+  push:
+    branches: 
+      - main
+      - Filip-Rework
 
 jobs:
   generate:
