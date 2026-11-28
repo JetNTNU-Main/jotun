@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-python@v7.1.0
         with:
           python-version: "3.11"
-      - run: Jotun_cycle.py -t cycle.txt -j cycle.json
+      - run: python Jotun_cycle.py -t cycle.txt -j cycle.json
       - uses: actions/upload-artifact@v7.0.2
         with:
           name: generated-outputs
